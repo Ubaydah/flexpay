@@ -63,7 +63,7 @@ ROOT_URLCONF = "flexpay.urls"
 
 CORS_ALLOW_ALL_ORIGINS = True
 
-#AUTH_USER_MODEL = "accounts.CustomUser"
+AUTH_USER_MODEL = "accounts.CustomUser"
 
 TEMPLATES = [
     {
