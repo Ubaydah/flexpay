@@ -1,0 +1,1 @@
+web:gunicorn --pythonpath flexpay flexpay.wsgi --log-file -
