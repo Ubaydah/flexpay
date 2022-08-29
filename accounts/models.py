@@ -53,6 +53,7 @@ class CompanyProfile(TimeStampAndUUIDBaseModel):
 
 
 class EmployeeeProfile(TimeStampAndUUIDBaseModel):
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
     company = models.ForeignKey(CompanyProfile, on_delete=models.CASCADE)
     name = models.CharField(max_length=250)
     transaction_pin = models.IntegerField(null=True, blank=True)

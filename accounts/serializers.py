@@ -21,12 +21,13 @@ class CompanyRegistrationSerializer(serializers.ModelSerializer):
         email = validated_data["email"]
         user = get_user_model()(email=email, phone_number=phone_number)
         user.set_password(validated_data["password"])
+        user.is_employer = True
         user.save()
 
         reference, yield_id = OvalFi.create_ovalfi_customer(
             str(company_name), str(phone_number), str(email)
         )
-        CompanyProfile(
+        CompanyProfile.objects.create(
             user=user,
             company_name=company_name,
             address=address,
