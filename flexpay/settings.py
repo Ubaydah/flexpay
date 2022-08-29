@@ -145,6 +145,12 @@ EMAIL_USE_SSL = True
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 SERVER_EMAIL = EMAIL_HOST_USER
 
+# OVALFINANCE
+
+OVALFI_TOKEN = os.environ.get("OVALFI_TOKEN")
+OVALFI_API_KEY = os.environ.get("OVALFI_API_KEY")
+OVALFI_YIELD_ID = os.environ.get("OVALFI_YIELD_ID")
+OVALFI_BASE_URL = "https://sandbox-api.ovalfi-app.com/api/v1"
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/

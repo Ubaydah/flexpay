@@ -1,6 +1,7 @@
 import uuid
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 from rest_framework_simplejwt.tokens import RefreshToken
 from .managers import CustomUserManager
@@ -40,3 +41,22 @@ class CustomUser(AbstractUser, TimeStampAndUUIDBaseModel):
     def tokens(self):
         refresh = RefreshToken.for_user(self)
         return {"refresh": str(refresh), "access": str(refresh.access_token)}
+
+
+class CompanyProfile(TimeStampAndUUIDBaseModel):
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
+    company_name = models.CharField(max_length=250)
+    address = models.CharField(max_length=250)
+    balance = models.DecimalField(decimal_places=3, default=0, max_digits=250)
+    oval_reference = models.CharField(max_length=20)
+    yield_offering_id = models.CharField(max_length=100)
+
+
+class EmployeeeProfile(TimeStampAndUUIDBaseModel):
+    company = models.ForeignKey(CompanyProfile, on_delete=models.CASCADE)
+    name = models.CharField(max_length=250)
+    transaction_pin = models.IntegerField(null=True, blank=True)
+    oval_reference = models.CharField(max_length=20)
+    role = models.CharField(max_length=250)
+    department = models.CharField(max_length=250)
+    salary = models.DecimalField(max_digits=20, decimal_places=3)
