@@ -7,7 +7,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from .models import CompanyProfile, CustomUser, EmployeeeProfile
 from .permissions import EmployerAccess
-from .serializers import CompanyRegistrationSerializer, EmployeeRegisterSerializer
+from .serializers import (
+    CompanyRegistrationSerializer,
+    EmployeeRegisterSerializer,
+    EmployeeSignupSerializer,
+)
 from accounts.services.auth_user import AuthService
 from flexpay.utils.helpers import Helper
 
@@ -79,5 +83,59 @@ class CreateEmployee(APIView):
                 status=status.HTTP_201_CREATED,
             )
         except Exception as e:
+            code, data = Helper.error_response(code=400, message=str(e))
+            return Response(data=data, status=code)
+
+
+class EmployeeSignup(APIView):
+    serializer_class = EmployeeSignupSerializer
+    queryset = EmployeeeProfile
+
+    def post(self, request):
+        try:
+            serializer = self.serializer_class(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            employee = serializer.save()
+
+            data = {
+                "id": employee.id,
+                "email": employee.user.email,
+                "name": employee.name,
+            }
+            code, result = Helper.success_response(data, "signup successful")
+            return Response(data=result, status=code)
+
+        except ValueError as e:
+            code, data = Helper.error_response(code=400, message=str(e))
+            return Response(data=data, status=code)
+
+
+class EmployeeLogin(APIView):
+    def post(self, request):
+        email = request.data.get("email")
+        password = request.data.get("password")
+        try:
+            user = AuthService.login_handler(email, password)
+
+            if user.is_employee == False:
+                code, data = Helper.error_response(
+                    code=400, message="You don't have an employee account"
+                )
+                return Response(data=data, status=code)
+            user.last_login = timezone.now()
+            user.save()
+            employee = EmployeeeProfile.objects.get(user=user)
+            data = {
+                "id": user.id,
+                "email": user.email,
+                "name": employee.name,
+                "company_name": employee.company.company_name,
+                "tokens": {"access": user.tokens()["access"]},
+                "last_login": user.last_login,
+            }
+            code, result = Helper.success_response(data, "login successful")
+            return Response(data=result, status=code)
+
+        except ValueError as e:
             code, data = Helper.error_response(code=400, message=str(e))
             return Response(data=data, status=code)

@@ -82,6 +82,37 @@ class EmployeeRegisterSerializer(serializers.ModelSerializer):
 
 
 class EmployeeSignupSerializer(serializers.ModelSerializer):
+    email = serializers.CharField()
+    password = serializers.CharField()
+    phone_number = serializers.CharField()
+
     class Meta:
         model = EmployeeeProfile
         fields = ["name", "email", "phone_number", "password"]
+
+    def save(self):
+        email = self.validated_data["email"]
+        password = self.validated_data["password"]
+        name = self.validated_data["name"]
+        phone_number = self.validated_data["phone_number"]
+        try:
+            user = get_user_model().objects.get(email=email)
+        except get_user_model().DoesNotExist:
+            raise ValueError("You don't have access to use this app")
+        if user.is_active == True:
+            raise ValueError("You already have an active account, login")
+        user.set_password(password)
+        user.phone_number = phone_number
+        user.is_active = True
+        user.save()
+
+        reference, yield_id, customer_id = OvalFi.create_ovalfi_customer(
+            str(name), str(phone_number), str(email)
+        )
+
+        employee = EmployeeeProfile.objects.get(user=user)
+        employee.oval_reference = reference
+        employee.oval_customer_id = customer_id
+        employee.save()
+
+        return employee
