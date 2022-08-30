@@ -26,7 +26,7 @@ class CompanyRegistrationSerializer(serializers.ModelSerializer):
         user.is_employer = True
         user.save()
 
-        reference, yield_id = OvalFi.create_ovalfi_customer(
+        reference, yield_id, customer_id = OvalFi.create_ovalfi_customer(
             str(company_name), str(phone_number), str(email)
         )
         CompanyProfile.objects.create(
@@ -35,6 +35,7 @@ class CompanyRegistrationSerializer(serializers.ModelSerializer):
             address=address,
             oval_reference=reference,
             yield_offering_id=yield_id,
+            oval_customer_id=customer_id,
         )
 
         return user
@@ -78,3 +79,9 @@ class EmployeeRegisterSerializer(serializers.ModelSerializer):
         Helper.send_employee_email(message, email)
 
         return employee
+
+
+class EmployeeSignupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EmployeeeProfile
+        fields = ["name", "email", "phone_number", "password"]

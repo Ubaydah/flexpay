@@ -50,6 +50,7 @@ class CompanyProfile(TimeStampAndUUIDBaseModel):
     balance = models.DecimalField(decimal_places=3, default=0, max_digits=250)
     oval_reference = models.CharField(max_length=20)
     yield_offering_id = models.CharField(max_length=100)
+    oval_customer_id = models.CharField(max_length=250, default="1234")
 
 
 class EmployeeeProfile(TimeStampAndUUIDBaseModel):
@@ -61,3 +62,4 @@ class EmployeeeProfile(TimeStampAndUUIDBaseModel):
     role = models.CharField(max_length=250)
     department = models.CharField(max_length=250)
     salary = models.DecimalField(max_digits=20, decimal_places=3)
+    oval_customer_id = models.CharField(max_length=250, default="1234")
