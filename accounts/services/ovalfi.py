@@ -2,15 +2,14 @@ from hashlib import sha256
 import json
 import requests
 from django.conf import settings
-from .utils import generate_unique_reference
+from flexpay.utils.helpers import Helper
 
 
 class OvalFi:
-    
     @staticmethod
     def create_ovalfi_customer(name, phone_number, email):
 
-        reference = generate_unique_reference()
+        reference = Helper.generate_unique_reference()
         signature = f"{settings.OVALFI_API_KEY}{reference}"
         hashed_signature = str(sha256(signature.encode("utf-8")).hexdigest())
         header = {
@@ -24,7 +23,7 @@ class OvalFi:
             "mobile_number": phone_number,
             "email": email,
             "reference": reference,
-            "yield_offering_id": yield_id
+            "yield_offering_id": yield_id,
         }
         data = json.dumps(payload)
         response = requests.post(

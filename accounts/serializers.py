@@ -1,7 +1,9 @@
 from django.contrib.auth import get_user_model
+from django.template.loader import render_to_string
 from rest_framework import serializers
-from .models import CompanyProfile
-from .services import OvalFi
+from .models import CompanyProfile, EmployeeeProfile
+from accounts.services.ovalfi import OvalFi
+from flexpay.utils.helpers import Helper
 
 
 class CompanyRegistrationSerializer(serializers.ModelSerializer):
@@ -36,3 +38,43 @@ class CompanyRegistrationSerializer(serializers.ModelSerializer):
         )
 
         return user
+
+
+class EmployeeRegisterSerializer(serializers.ModelSerializer):
+    email = serializers.CharField()
+
+    class Meta:
+        model = EmployeeeProfile
+        fields = ["name", "email", "role", "department", "salary"]
+
+    def create(self, validated_data):
+        auth_user = self.context["request"].user
+        company = CompanyProfile.objects.get(user=auth_user)
+        email = validated_data["email"]
+        user = get_user_model()(email=email)
+        user.is_active = False
+        user.is_employee = True
+        user.save()
+        name = validated_data["name"]
+        role = validated_data["role"]
+        department = validated_data["department"]
+        salary = validated_data["salary"]
+
+        employee = EmployeeeProfile.objects.create(
+            user=user,
+            company=company,
+            name=name,
+            role=role,
+            department=department,
+            salary=salary,
+            oval_reference="12345",
+        )
+        message = render_to_string(
+            "email/employee-welcome.html",
+            {
+                "name": name,
+            },
+        )
+        Helper.send_employee_email(message, email)
+
+        return employee

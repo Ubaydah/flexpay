@@ -1,11 +1,15 @@
-from asyncio import start_unix_server
-from django.contrib.auth import get_user_model, authenticate
 from django.utils import timezone
+from django.template.loader import render_to_string
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.generics import CreateAPIView
+from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
-from .models import CompanyProfile, CustomUser
-from .serializers import CompanyRegistrationSerializer
+from .models import CompanyProfile, CustomUser, EmployeeeProfile
+from .permissions import EmployerAccess
+from .serializers import CompanyRegistrationSerializer, EmployeeRegisterSerializer
+from accounts.services.auth_user import AuthService
+from flexpay.utils.helpers import Helper
 
 
 class CompanyRegister(APIView):
@@ -22,36 +26,23 @@ class CompanyRegister(APIView):
                 {"status": True, "message": "company registration successsful"},
                 status=status.HTTP_201_CREATED,
             )
-
         except Exception as e:
-            return Response(
-                {"status": False, "message": str(e)},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            code, data = Helper.error_response(code=400, message=str(e))
+            return Response(data=data, status=code)
 
 
 class CompanyLogin(APIView):
     def post(self, request):
         email = request.data.get("email")
         password = request.data.get("password")
-
         try:
-            user = authenticate(email=email, password=password)
-            if not user:
-                return Response(
-                    {"status": False, "message": "Invalid credentials, try again"},
-                    status=400,
-                )
-            if user.is_active == False:
-                return Response(
-                    {"status": False, "message": "Account disabled, contact admin"},
-                    status=400,
-                )
+            user = AuthService.login_handler(email, password)
+
             if user.is_employer == False:
-                return Response(
-                    {"status": False, "message": "you don't have a company account"},
-                    status=403,
+                code, data = Helper.error_response(
+                    code=400, message="You don't have a company account"
                 )
+                return Response(data=data, status=code)
             user.last_login = timezone.now()
             user.save()
             company = CompanyProfile.objects.get(user=user)
@@ -63,11 +54,30 @@ class CompanyLogin(APIView):
                 "tokens": {"access": user.tokens()["access"]},
                 "last_login": user.last_login,
             }
-            return Response(
-                {"status": True, "message": "login successful", "data": data}
+            code, result = Helper.success_response(data, "login successful")
+            return Response(data=result, status=code)
+
+        except ValueError as e:
+            code, data = Helper.error_response(code=400, message=str(e))
+            return Response(data=data, status=code)
+
+
+class CreateEmployee(APIView):
+    serializer_class = EmployeeRegisterSerializer
+    queryset = EmployeeeProfile
+    permission_classes = [(IsAuthenticated & EmployerAccess)]
+
+    def post(self, request):
+        try:
+            serializer = self.serializer_class(
+                data=request.data, context={"request": request}
             )
-        except get_user_model().DoesNotExist:
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
             return Response(
-                {"status": False, "message": "No active account with this details"},
-                status=400,
+                {"status": True, "message": "employee registration successsful"},
+                status=status.HTTP_201_CREATED,
             )
+        except Exception as e:
+            code, data = Helper.error_response(code=400, message=str(e))
+            return Response(data=data, status=code)
