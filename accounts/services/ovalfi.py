@@ -23,7 +23,7 @@ class OvalFi:
             "mobile_number": phone_number,
             "email": email,
             "reference": reference,
-            "yield_offering_id": yield_id,
+            "yield_offering_id": yield_id
         }
         data = json.dumps(payload)
         response = requests.post(

@@ -10,8 +10,3 @@ def create_wallet(sender, instance, created, **kwargs):
         Wallet.objects.create(user=instance, wallet_type="company")
     elif created and instance.is_employee == True:
         Wallet.objects.create(user=instance, wallet_type="employee")
-
-
-@receiver(post_save, sender=settings.AUTH_USER_MODEL)
-def save_wallet(sender, instance, **kwargs):
-    instance.wallet.save()
