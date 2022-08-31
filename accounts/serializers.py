@@ -21,22 +21,25 @@ class CompanyRegistrationSerializer(serializers.ModelSerializer):
         phone_number = validated_data["phone_number"]
         address = validated_data["address"]
         email = validated_data["email"]
-        user = get_user_model()(email=email, phone_number=phone_number)
-        user.set_password(validated_data["password"])
-        user.is_employer = True
-        user.save()
+        try:
+            reference, yield_id, customer_id = OvalFi.create_ovalfi_customer(
+                str(company_name), str(phone_number), str(email)
+            )
+            user = get_user_model()(email=email, phone_number=phone_number)
+            user.set_password(validated_data["password"])
+            user.is_employer = True
+            user.save()
 
-        reference, yield_id, customer_id = OvalFi.create_ovalfi_customer(
-            str(company_name), str(phone_number), str(email)
-        )
-        CompanyProfile.objects.create(
-            user=user,
-            company_name=company_name,
-            address=address,
-            oval_reference=reference,
-            yield_offering_id=yield_id,
-            oval_customer_id=customer_id,
-        )
+            CompanyProfile.objects.create(
+                user=user,
+                company_name=company_name,
+                address=address,
+                oval_reference=reference,
+                yield_offering_id=yield_id,
+                oval_customer_id=customer_id,
+            )
+        except ValueError as e:
+            raise ValueError("An error occured")
 
         return user
 
@@ -101,18 +104,21 @@ class EmployeeSignupSerializer(serializers.ModelSerializer):
             raise ValueError("You don't have access to use this app")
         if user.is_active == True:
             raise ValueError("You already have an active account, login")
-        user.set_password(password)
-        user.phone_number = phone_number
-        user.is_active = True
-        user.save()
+        try:
 
-        reference, yield_id, customer_id = OvalFi.create_ovalfi_customer(
-            str(name), str(phone_number), str(email)
-        )
+            reference, yield_id, customer_id = OvalFi.create_ovalfi_customer(
+                str(name), str(phone_number), str(email)
+            )
+            user.set_password(password)
+            user.phone_number = phone_number
+            user.is_active = True
+            user.save()
 
-        employee = EmployeeeProfile.objects.get(user=user)
-        employee.oval_reference = reference
-        employee.oval_customer_id = customer_id
-        employee.save()
+            employee = EmployeeeProfile.objects.get(user=user)
+            employee.oval_reference = reference
+            employee.oval_customer_id = customer_id
+            employee.save()
+        except ValueError as e:
+            raise ValueError("an error occcured ")
 
         return employee
