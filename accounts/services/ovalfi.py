@@ -36,3 +36,22 @@ class OvalFi:
             return reference, yield_id, customer_id
         else:
             raise ValueError("An error occured")
+
+    @staticmethod
+    def convert_currency(amount, currency):
+        header = {
+            "Authorization": f"Bearer {settings.OVALFI_TOKEN}",
+            "Content-Type": "application/json",
+        }
+
+        response = requests.get(
+            f"{settings.OVALFI_BASE_URL}/transfer/detail?amount={amount}&currency=USD&destination_currency={currency}",
+            headers=header,
+        )
+        print(response.text)
+        if response.ok:
+            response_dict = json.loads(response.text)
+            amount = response_dict["data"]["amount"]
+            return amount
+        else:
+            raise ValueError("An error occured")

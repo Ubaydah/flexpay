@@ -122,3 +122,9 @@ class EmployeeSignupSerializer(serializers.ModelSerializer):
             raise ValueError("an error occcured ")
 
         return employee
+
+
+class EmployeeViewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EmployeeeProfile
+        fields = ["name", "role", "salary"]

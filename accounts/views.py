@@ -1,8 +1,9 @@
+import django_filters
 from django.utils import timezone
 from django.template.loader import render_to_string
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from .models import CompanyProfile, CustomUser, EmployeeeProfile
@@ -11,6 +12,7 @@ from .serializers import (
     CompanyRegistrationSerializer,
     EmployeeRegisterSerializer,
     EmployeeSignupSerializer,
+    EmployeeViewSerializer,
 )
 from accounts.services.auth_user import AuthService
 from flexpay.utils.helpers import Helper
@@ -101,6 +103,8 @@ class EmployeeSignup(APIView):
                 "id": employee.id,
                 "email": employee.user.email,
                 "name": employee.name,
+                "role": employee.role,
+                "company_name": employee.company.company_name,
             }
             code, result = Helper.success_response(data, "signup successful")
             return Response(data=result, status=code)
@@ -129,6 +133,7 @@ class EmployeeLogin(APIView):
                 "id": user.id,
                 "email": user.email,
                 "name": employee.name,
+                "role": employee.role,
                 "company_name": employee.company.company_name,
                 "tokens": {"access": user.tokens()["access"]},
                 "last_login": user.last_login,
@@ -139,3 +144,15 @@ class EmployeeLogin(APIView):
         except ValueError as e:
             code, data = Helper.error_response(code=400, message=str(e))
             return Response(data=data, status=code)
+
+
+class ListEmployees(ListAPIView):
+    permission_classes = [(IsAuthenticated & EmployerAccess)]
+    serializer_class = EmployeeViewSerializer
+    queryset = EmployeeeProfile
+    filterset_fields = ["department"]
+
+    def get_queryset(self):
+        user = self.request.user
+        company = CompanyProfile.objects.get(user=user)
+        return self.queryset.objects.filter(company=company).order_by("id")
