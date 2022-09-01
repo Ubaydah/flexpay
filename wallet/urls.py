@@ -1,4 +1,3 @@
-from tkinter import E
 from django.urls import path
 from .views import ExchangeRateView
 
