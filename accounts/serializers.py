@@ -127,4 +127,4 @@ class EmployeeSignupSerializer(serializers.ModelSerializer):
 class EmployeeViewSerializer(serializers.ModelSerializer):
     class Meta:
         model = EmployeeeProfile
-        fields = ["name", "role", "salary"]
+        fields = ["id", "name", "role", "salary"]
