@@ -38,14 +38,14 @@ class OvalFi:
             raise ValueError("An error occured")
 
     @staticmethod
-    def convert_currency(amount, currency):
+    def convert_currency(amount, currency_from, currency_to):
         header = {
             "Authorization": f"Bearer {settings.OVALFI_TOKEN}",
             "Content-Type": "application/json",
         }
 
         response = requests.get(
-            f"{settings.OVALFI_BASE_URL}/transfer/detail?amount={amount}&currency=USD&destination_currency={currency}",
+            f"{settings.OVALFI_BASE_URL}/transfer/detail?amount={amount}&currency={currency_from}&destination_currency={currency_to}",
             headers=header,
         )
         print(response.text)
