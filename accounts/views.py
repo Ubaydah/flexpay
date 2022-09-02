@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.permissions import IsAuthenticated
-from rest_framework import status
+from rest_framework import status, filters
 from .models import CompanyProfile, CustomUser, EmployeeeProfile
 from .permissions import EmployerAccess
 from .serializers import (
@@ -150,7 +150,12 @@ class ListEmployees(ListAPIView):
     permission_classes = [(IsAuthenticated & EmployerAccess)]
     serializer_class = EmployeeViewSerializer
     queryset = EmployeeeProfile
+    filter_backends = (
+        filters.SearchFilter,
+        django_filters.rest_framework.DjangoFilterBackend,
+    )
     filterset_fields = ["department"]
+    search_fields = ["name"]
 
     def get_queryset(self):
         user = self.request.user

@@ -23,7 +23,7 @@ class OvalFi:
             "mobile_number": phone_number,
             "email": email,
             "reference": reference,
-            "yield_offering_id": yield_id
+            "yield_offering_id": yield_id,
         }
         data = json.dumps(payload)
         response = requests.post(
@@ -53,5 +53,26 @@ class OvalFi:
             response_dict = json.loads(response.text)
             amount = response_dict["data"]["amount"]
             return amount
+        else:
+            raise ValueError("An error occured")
+
+    @staticmethod
+    def initiate_deposit(customer_id, reference, amount):
+        signature = f"{settings.OVALFI_API_KEY}{reference}"
+        hashed_signature = str(sha256(signature.encode("utf-8")).hexdigest())
+        header = {
+            "Authorization": f"Bearer {settings.OVALFI_TOKEN}",
+            "Signature": hashed_signature,
+            "Content-Type": "application/json",
+        }
+
+        payload = {"customer_id": customer_id, "reference": reference, "amount": amount}
+        response = requests.post(
+            f"{settings.OVALFI_BASE_URL}/deposit", headers=header, data=payload
+        )
+        print(response.text)
+        if response.ok:
+            response_dict = json.loads(response.text)
+            return response_dict["data"]
         else:
             raise ValueError("An error occured")
