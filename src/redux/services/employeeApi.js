@@ -1,9 +1,9 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
-import { baseQueryWithReauth, createRequest, createRequestWithParams } from "./shared";
+import { baseQuery, createRequest, createRequestWithParams } from "./shared";
 
 export const employeeApi = createApi({
   reducerPath: "employeeApi",
-  baseQuery: baseQueryWithReauth,
+  baseQuery: baseQuery,
   tagTypes: ["employees"],
   endpoints: (builder) => ({
     getEmployees: builder.query({

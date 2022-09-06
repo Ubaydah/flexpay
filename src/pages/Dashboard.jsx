@@ -8,10 +8,12 @@ import Image2 from "../assets/image2.png";
 import Image3 from "../assets/image3.png";
 import Image4 from "../assets/image4.png";
 import Wrapper from "../HOC/Wrapper";
+import LoadingModal from "../components/LoadingModal";
 
 const Dashboard = () => {
   return (
     <Wrapper>
+      <LoadingModal />
       <div className="w-full md:w-[60%] mt-5 p-3 md:p-0 md:mx-5">
         <Navbar navbar="Dashboard" />
         <p className="font-semibold sm:hidden text-xl mb-3">Dashboard</p>

@@ -22,24 +22,33 @@ const EmployeesList = ({ query, setQuery, data }) => {
             <EmptyFetch content={"No Employees added yet"} />
           ) : (
             data?.results.map((employee, index) => (
-              <div className="flex justify-between items-center border-2 border-[rgba(106, 102, 102, 0.51)] rounded-lg p-4 mb-7" key={index}>
-                <div className="flex items-start sm:items-center sm:w-auto w-full">
-                  <img src={Image4} alt="" />
-                  <div className="ml-5 w-full ">
-                    <p className="text-[16px] font-bold">{employee?.name}</p>
-                    <p className="text-sm font-thin">{employee?.department}</p>
-                    <div className="sm:hidden flex  items-end justify-between w-full">
-                      <div>
-                        <p className="text-sm font-thin mt-3">Salary</p>
-                        <p className="text-[16px] font-bold">${employee?.salary}</p>
+              <div
+                className="w-full md:grid md:grid-cols-5 border-2 border-[rgba(106, 102, 102, 0.51)] rounded-lg p-4 mb-7 md:grid-col-3"
+                key={index}
+              >
+                <div className="flex flex-col items-start sm:items-start break-all sm:w-auto w-full md:col-span-2">
+                  <div className="gap-2 items-center hidden md:flex">
+                    <img src={Image4} alt="" />
+                    <p className="text-[16px] font-bold break-words w-full md:max-w-[250px] w-auto">{employee?.name}</p>
+                  </div>
+                  <div className="flex gap-2 md:hidden items-start">
+                    <img src={Image4} alt="" />
+                    <div>
+                      <p className="text-[16px] font-bold break-words w-full md:hidden md:max-w-[250px] w-auto">{employee?.name}</p>
+                      <p className="text-sm font-thin break-words">{employee?.department}</p>
+                      <div className="sm:hidden flex  items-end justify-between w-full">
+                        <div>
+                          <p className="text-sm font-thin mt-3">Salary</p>
+                          <p className="text-[16px] font-bold">${employee?.salary}</p>
+                        </div>
+                        <button className="px-2 py-2 rounded-xl bg-orange text-white font-bold text-base  hover:border-2 hover:border-orange hover:bg-white hover:text-orange">
+                          view account
+                        </button>
                       </div>
-                      <button className="px-2 py-2 rounded-xl bg-orange text-white font-bold text-base  hover:border-2 hover:border-orange hover:bg-white hover:text-orange">
-                        view account
-                      </button>
                     </div>
                   </div>
                 </div>
-                <div className="hidden sm:block">
+                <div className="hidden sm:block md:col-span-2 w-full">
                   <p className="text-sm font-thin">Salary</p>
                   <p className="text-base font-bold">${employee?.salary}</p>
                 </div>
@@ -49,7 +58,7 @@ const EmployeesList = ({ query, setQuery, data }) => {
               </div>
             ))
           )}
-          {data?.results.length > 10 && <Pagination query={query} setQuery={setQuery} data={data?.results} count={data?.count} />}
+          {data?.count > 8 && <Pagination query={query} setQuery={setQuery} data={data?.results} count={data?.count} />}
         </>
       )}
     </div>
