@@ -52,6 +52,9 @@ class CompanyProfile(TimeStampAndUUIDBaseModel):
     yield_offering_id = models.CharField(max_length=100)
     oval_customer_id = models.CharField(max_length=250, default="1234")
 
+    def __str__(self):
+        return self.company_name
+
 
 class EmployeeeProfile(TimeStampAndUUIDBaseModel):
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
@@ -63,3 +66,6 @@ class EmployeeeProfile(TimeStampAndUUIDBaseModel):
     department = models.CharField(max_length=250)
     salary = models.DecimalField(max_digits=20, decimal_places=3)
     oval_customer_id = models.CharField(max_length=250, default="1234")
+
+    def __str__(self):
+        return self.name
