@@ -9,6 +9,7 @@ from .serializers import (
     ExchangeRateSerializer,
     WalletDetailsSerializer,
     WalletTransactionSerializer,
+    WithdrawalSerializer,
 )
 from flexpay.utils.helpers import Helper
 
@@ -71,3 +72,24 @@ class WalletTransactionView(ListAPIView):
         user = self.request.user
         wallet = Wallet.objects.get(user=user)
         return self.queryset.objects.filter(wallet=wallet).order_by("created_at")
+
+
+class WithdrawalView(APIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = WithdrawalSerializer
+
+    def post(self, request):
+        try:
+            serializer = self.serializer_class(
+                data=request.data, context={"request": request}
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+
+            return Response(
+                {"status": True, "message": "withdrawal successsful"},
+                status=status.HTTP_200_OK,
+            )
+        except ValueError as e:
+            code, data = Helper.error_response(code=400, message=str(e))
+            return Response(data=data, status=code)

@@ -2,6 +2,7 @@ from django.db.models import Sum
 from rest_framework import serializers
 from accounts.models import CompanyProfile, EmployeeeProfile
 from accounts.services.ovalfi import OvalFi
+from flexpay.utils.helpers import Helper
 from .models import Wallet, WalletTransaction
 
 
@@ -54,6 +55,7 @@ class DepositSerializer(serializers.Serializer):
                 transaction_type="deposit",
                 description=description,
                 amount=amount,
+                status="success",
             )
 
             return data
@@ -65,12 +67,7 @@ class WalletDetailsSerializer(serializers.ModelSerializer):
     balance = serializers.SerializerMethodField()
 
     def get_balance(self, obj):
-        bal = WalletTransaction.objects.filter(wallet=obj).aggregate(Sum("amount"))[
-            "amount__sum"
-        ]
-        print(bal)
-        if bal == None:
-            return 0.0
+        bal = Helper.get_balance(obj)
         return bal
 
     class Meta:
@@ -82,3 +79,26 @@ class WalletTransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = WalletTransaction
         fields = ["id", "transaction_type", "description", "amount", "created_at"]
+
+
+class WithdrawalSerializer(serializers.Serializer):
+    amount = serializers.FloatField()
+    description = serializers.CharField()
+
+    def save(self):
+        user = self.context["request"].user
+        amount = self.validated_data["amount"]
+        description = self.validated_data["description"]
+        wallet = Wallet.objects.get(user=user)
+        bal = Helper.get_balance(wallet)
+        if amount > bal:
+            raise ValueError("Insufficient funds in wallet")
+        WalletTransaction.objects.create(
+            wallet=wallet,
+            transaction_type="withdrawal",
+            description=description,
+            amount=-amount,
+            status="success",
+        )
+
+        return wallet

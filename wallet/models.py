@@ -27,6 +27,7 @@ class WalletTransaction(TimeStampAndUUIDBaseModel):
 
     TRANSACTION_TYPES = (
         ("deposit", "deposit"),
+        ("withdrawal", "withdrawal"),
         ("transfer", "transfer"),
     )
     wallet = models.ForeignKey(Wallet, null=True, on_delete=models.CASCADE)

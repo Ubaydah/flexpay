@@ -1,6 +1,8 @@
 import random
 from django.core.mail import EmailMessage
+from django.db.models import Sum
 from rest_framework import status
+from wallet.models import WalletTransaction
 
 
 class Helper:
@@ -28,3 +30,12 @@ class Helper:
         subject = "Welcome to FlexPay"
         mail = EmailMessage(subject, message, to=[email])
         mail.send()
+
+    @staticmethod
+    def get_balance(wallet):
+        bal = WalletTransaction.objects.filter(wallet=wallet).aggregate(Sum("amount"))[
+            "amount__sum"
+        ]
+        if bal == None:
+            return 0.0
+        return bal
