@@ -56,7 +56,6 @@ class CompanyLogin(APIView):
                 "id": user.id,
                 "email": user.email,
                 "company_name": company.company_name,
-                "balance": company.balance,
                 "tokens": {"access": user.tokens()["access"]},
                 "last_login": user.last_login,
             }
