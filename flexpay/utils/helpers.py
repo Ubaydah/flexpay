@@ -21,7 +21,7 @@ class Helper:
 
     @staticmethod
     def success_response(payload, message, code=200):
-        status_code = status.HTTP_200_OK if code == 200 else status.HTTP_201_CREATED
+        code = status.HTTP_200_OK if code == 200 else status.HTTP_201_CREATED
         result = {"status": "True", "message": message, "data": payload}
         return (code, result)
 
