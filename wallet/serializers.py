@@ -76,3 +76,9 @@ class WalletDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Wallet
         fields = ["id", "currency", "balance"]
+
+
+class WalletTransactionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WalletTransaction
+        fields = ["id", "transaction_type", "description", "amount", "created_at"]
