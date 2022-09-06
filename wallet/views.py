@@ -71,7 +71,7 @@ class WalletTransactionView(ListAPIView):
     def get_queryset(self):
         user = self.request.user
         wallet = Wallet.objects.get(user=user)
-        return self.queryset.objects.filter(wallet=wallet).order_by("created_at")
+        return self.queryset.objects.filter(wallet=wallet).order_by("-created_at")
 
 
 class WithdrawalView(APIView):
