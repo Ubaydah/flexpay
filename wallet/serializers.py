@@ -68,6 +68,9 @@ class WalletDetailsSerializer(serializers.ModelSerializer):
         bal = WalletTransaction.objects.filter(wallet=obj).aggregate(Sum("amount"))[
             "amount__sum"
         ]
+        print(bal)
+        if bal == None:
+            return 0.0
         return bal
 
     class Meta:
