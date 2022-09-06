@@ -1,5 +1,6 @@
+from django.db.models import Sum
 from rest_framework import serializers
-from accounts.models import CompanyProfile
+from accounts.models import CompanyProfile, EmployeeeProfile
 from accounts.services.ovalfi import OvalFi
 from .models import Wallet, WalletTransaction
 
@@ -30,10 +31,23 @@ class DepositSerializer(serializers.Serializer):
 
         if user.is_employer == True:
             company = CompanyProfile.objects.get(user=user)
-            reference = company.oval_reference
             customer_id = company.oval_customer_id
 
-            data = OvalFi.initiate_deposit(customer_id, reference, amount)
+            data = OvalFi.initiate_deposit(customer_id, amount)
+            wallet = Wallet.objects.get(user=user)
+            WalletTransaction.objects.create(
+                wallet=wallet,
+                transaction_type="deposit",
+                description=description,
+                amount=amount,
+            )
+
+            return data
+        elif user.is_employee == True:
+            employee = EmployeeeProfile.objects.get(user=user)
+            customer_id = employee.oval_customer_id
+
+            data = OvalFi.initiate_deposit(customer_id, amount)
             wallet = Wallet.objects.get(user=user)
             WalletTransaction.objects.create(
                 wallet=wallet,
@@ -44,4 +58,18 @@ class DepositSerializer(serializers.Serializer):
 
             return data
         else:
-            raise ValueError("an error occured")
+            raise ValueError("An error occured")
+
+
+class WalletDetailsSerializer(serializers.ModelSerializer):
+    balance = serializers.SerializerMethodField()
+
+    def get_balance(self, obj):
+        bal = WalletTransaction.objects.filter(wallet=obj).aggregate(Sum("amount"))[
+            "amount__sum"
+        ]
+        return bal
+
+    class Meta:
+        model = Wallet
+        fields = ["id", "currency", "balance"]

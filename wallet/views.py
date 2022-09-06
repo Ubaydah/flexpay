@@ -2,7 +2,12 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import DepositSerializer, ExchangeRateSerializer
+from .models import Wallet
+from .serializers import (
+    DepositSerializer,
+    ExchangeRateSerializer,
+    WalletDetailsSerializer,
+)
 from flexpay.utils.helpers import Helper
 
 
@@ -23,6 +28,15 @@ class ExchangeRateView(APIView):
         except ValueError as e:
             code, data = Helper.error_response(code=400, message=str(e))
             return Response(data=data, status=code)
+
+
+class WalletDetailsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        wallet = Wallet.objects.get(user=request.user)
+        data = WalletDetailsSerializer(wallet).data
+        return Response(data)
 
 
 class DepositView(APIView):

@@ -57,18 +57,21 @@ class OvalFi:
             raise ValueError("An error occured")
 
     @staticmethod
-    def initiate_deposit(customer_id, reference, amount):
+    def initiate_deposit(customer_id, amount):
+        reference = Helper.generate_unique_reference()
         signature = f"{settings.OVALFI_API_KEY}{reference}"
         hashed_signature = str(sha256(signature.encode("utf-8")).hexdigest())
+        print(hashed_signature)
         header = {
             "Authorization": f"Bearer {settings.OVALFI_TOKEN}",
             "Signature": hashed_signature,
-            "Content-Type": "application/json",
+            "Content-Type": "application/json"
         }
 
         payload = {"customer_id": customer_id, "reference": reference, "amount": amount}
+        data = json.dumps(payload)
         response = requests.post(
-            f"{settings.OVALFI_BASE_URL}/deposit", headers=header, data=payload
+            f"{settings.OVALFI_BASE_URL}/deposit", headers=header, data=data
         )
         print(response.text)
         if response.ok:
