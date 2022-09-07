@@ -2,6 +2,7 @@ import random
 from django.core.mail import EmailMessage
 from django.db.models import Sum
 from rest_framework import status
+from rest_framework.response import Response
 from wallet.models import WalletTransaction
 
 
@@ -39,3 +40,20 @@ class Helper:
         if bal == None:
             return 0.0
         return bal
+
+    @staticmethod
+    def view_handler(serializer_class, request, message):
+        try:
+            serializer = serializer_class(
+                data=request.data, context={"request": request}
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+
+            return Response(
+                {"status": True, "message": message},
+                status=status.HTTP_200_OK,
+            )
+        except ValueError as e:
+            code, data = Helper.error_response(code=400, message=str(e))
+            return Response(data=data, status=code)

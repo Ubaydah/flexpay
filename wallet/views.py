@@ -10,7 +10,9 @@ from .serializers import (
     WalletDetailsSerializer,
     WalletTransactionSerializer,
     WithdrawalSerializer,
+    EmployeeTransferSerializer,
 )
+from accounts.permissions import EmployerAccess
 from flexpay.utils.helpers import Helper
 
 
@@ -47,20 +49,10 @@ class DepositView(APIView):
     serializer_class = DepositSerializer
 
     def post(self, request):
-        try:
-            serializer = DepositSerializer(
-                data=request.data, context={"request": request}
-            )
-            serializer.is_valid(raise_exception=True)
-            data = serializer.save()
+        message = "deposit successful"
+        response = Helper.view_handler(self.serializer_class, request, message)
 
-            return Response(
-                {"status": True, "message": "deposit successsful", "data": data},
-                status=status.HTTP_200_OK,
-            )
-        except ValueError as e:
-            code, data = Helper.error_response(code=400, message=str(e))
-            return Response(data=data, status=code)
+        return response
 
 
 class WalletTransactionView(ListAPIView):
@@ -79,17 +71,18 @@ class WithdrawalView(APIView):
     serializer_class = WithdrawalSerializer
 
     def post(self, request):
-        try:
-            serializer = self.serializer_class(
-                data=request.data, context={"request": request}
-            )
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
+        message = "withdrawal successful"
+        response = Helper.view_handler(self.serializer_class, request, message)
 
-            return Response(
-                {"status": True, "message": "withdrawal successsful"},
-                status=status.HTTP_200_OK,
-            )
-        except ValueError as e:
-            code, data = Helper.error_response(code=400, message=str(e))
-            return Response(data=data, status=code)
+        return response
+
+
+class EmployeeTransferView(APIView):
+    permission_classes = [(IsAuthenticated & EmployerAccess)]
+    serializer_class = EmployeeTransferSerializer
+
+    def post(self, request):
+        message = "transfer successful"
+        response = Helper.view_handler(self.serializer_class, request, message)
+
+        return response

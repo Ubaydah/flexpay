@@ -102,3 +102,42 @@ class WithdrawalSerializer(serializers.Serializer):
         )
 
         return wallet
+
+
+class EmployeeTransferSerializer(serializers.Serializer):
+    amount = serializers.FloatField()
+    employee_id = serializers.CharField()
+
+    def save(self):
+        user = self.context["request"].user
+        amount = self.validated_data["amount"]
+        employee_id = self.validated_data["employee_id"]
+        try:
+            company = CompanyProfile.objects.get(user=user)
+            user_wallet = Wallet.objects.get(user=user)
+            employee = EmployeeeProfile.objects.get(id=employee_id, company=company)
+            employee_wallet = Wallet.objects.get(user=employee.user)
+            user_bal = Helper.get_balance(user_wallet)
+            if amount > user_bal:
+                raise ValueError("Insufficient funds in wallet")
+            WalletTransaction.objects.create(
+                wallet=user_wallet,
+                transaction_type="transfer",
+                description=f"transfer to {employee.name}",
+                amount=-amount,
+                source=user_wallet,
+                destination=employee_wallet,
+                status="success",
+            )
+
+            WalletTransaction.objects.create(
+                wallet=employee_wallet,
+                transaction_type="transfer",
+                description=f"transfer from {company.company_name}",
+                amount=amount,
+                source=user_wallet,
+                destination=employee_wallet,
+                status="success",
+            )
+        except Exception as e:
+            raise ValueError(str(e))
