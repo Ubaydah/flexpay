@@ -107,10 +107,12 @@ class WithdrawalSerializer(serializers.Serializer):
 class EmployeeTransferSerializer(serializers.Serializer):
     amount = serializers.FloatField()
     employee_id = serializers.CharField()
+    description = serializers.CharField()
 
     def save(self):
         user = self.context["request"].user
         amount = self.validated_data["amount"]
+        description = self.validated_data["description"]
         employee_id = self.validated_data["employee_id"]
         try:
             company = CompanyProfile.objects.get(user=user)
@@ -123,7 +125,7 @@ class EmployeeTransferSerializer(serializers.Serializer):
             WalletTransaction.objects.create(
                 wallet=user_wallet,
                 transaction_type="transfer",
-                description=f"transfer to {employee.name}",
+                description=description,
                 amount=-amount,
                 source=user_wallet,
                 destination=employee_wallet,
@@ -133,7 +135,7 @@ class EmployeeTransferSerializer(serializers.Serializer):
             WalletTransaction.objects.create(
                 wallet=employee_wallet,
                 transaction_type="transfer",
-                description=f"transfer from {company.company_name}",
+                description=description,
                 amount=amount,
                 source=user_wallet,
                 destination=employee_wallet,
