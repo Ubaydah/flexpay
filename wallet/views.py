@@ -11,6 +11,7 @@ from .serializers import (
     WalletTransactionSerializer,
     WithdrawalSerializer,
     EmployeeTransferSerializer,
+    TransferSerializer,
 )
 from accounts.permissions import EmployerAccess
 from flexpay.utils.helpers import Helper
@@ -80,6 +81,17 @@ class WithdrawalView(APIView):
 class EmployeeTransferView(APIView):
     permission_classes = [(IsAuthenticated & EmployerAccess)]
     serializer_class = EmployeeTransferSerializer
+
+    def post(self, request):
+        message = "transfer successful"
+        response = Helper.view_handler(self.serializer_class, request, message)
+
+        return response
+
+
+class TransferView(APIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = TransferSerializer
 
     def post(self, request):
         message = "transfer successful"

@@ -143,3 +143,83 @@ class EmployeeTransferSerializer(serializers.Serializer):
             )
         except Exception as e:
             raise ValueError(str(e))
+
+
+class TransferSerializer(serializers.Serializer):
+    amount = serializers.FloatField()
+    currency = serializers.CharField()
+    account_number = serializers.CharField()
+    bank_name = serializers.CharField()
+    description = serializers.CharField()
+    routing_number = serializers.CharField()
+
+    def save(self):
+        user = self.context["request"].user
+        amount = self.validated_data["amount"]
+        currency = self.validated_data["currency"]
+        account_number = self.validated_data["account_number"]
+        bank_name = self.validated_data["bank_name"]
+        description = self.validated_data["description"]
+        routing_number = self.validated_data["routing_number"]
+
+        if user.is_employer == True:
+            company = CompanyProfile.objects.get(user=user)
+            customer_id = company.oval_customer_id
+            name = company.company_name
+            address = company.address
+            data = OvalFi.initiate_transfer(
+                customer_id=customer_id,
+                amount=amount,
+                currency=currency,
+                account_number=account_number,
+                bank_name=bank_name,
+                name=name,
+                address=address,
+                description=description,
+                routing_number=routing_number,
+            )
+            wallet = Wallet.objects.get(user=user)
+            bal = Helper.get_balance(wallet)
+            if amount > bal:
+                raise ValueError("Insufficient funds in wallet")
+            WalletTransaction.objects.create(
+                wallet=wallet,
+                transaction_type="transfer",
+                description=description,
+                amount=amount,
+                source=wallet,
+            )
+
+            return data
+        elif user.is_employee == True:
+            employee = EmployeeeProfile.objects.get(user=user)
+            customer_id = employee.oval_customer_id
+            name = employee.name
+            address = "null"
+            data = OvalFi.initiate_transfer(
+                customer_id=customer_id,
+                amount=amount,
+                currency=currency,
+                account_number=account_number,
+                bank_name=bank_name,
+                name=name,
+                address=address,
+                description=description,
+                routing_number=routing_number,
+            )
+            wallet = Wallet.objects.get(user=user)
+            bal = Helper.get_balance(wallet)
+            if amount > bal:
+                raise ValueError("Insufficient funds in wallet")
+            WalletTransaction.objects.create(
+                wallet=wallet,
+                transaction_type="transfer",
+                description=description,
+                amount=amount,
+                status="success",
+                source=wallet,
+            )
+
+            return data
+        else:
+            raise ValueError("An error occured")

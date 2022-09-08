@@ -90,6 +90,7 @@ class OvalFi:
             "Signature": hashed_signature,
             "Content-Type": "application/json",
         }
+        print(hashed_signature)
         customer_id = details.get("customer_id")
         amount = details.get("amount")
         currency = details.get("currency", "USD")
@@ -98,6 +99,7 @@ class OvalFi:
         name = details.get("name")
         address = details.get("address")
         description = details.get("description")
+        routing_number = details.get("routing_number")
         payload = {
             "customer_id": customer_id,
             "amount": amount,
@@ -105,13 +107,15 @@ class OvalFi:
             "destination": {
                 "bank_details": {
                     "account_number": account_number,
+                    "routing_number": routing_number,
                     "bank_name": bank_name,
                     "country": "Nigeria",
-                    "is_within_us": "no",
+                    "is_within_us": "yes",
                 },
                 "personal_details": {
                     "name": name,
                     "country": "Nigeria",
+                    "city": "Lagos",
                     "address": address,
                 },
             },
