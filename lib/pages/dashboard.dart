@@ -1,18 +1,37 @@
 // ignore_for_file: prefer_const_constructors, sort_child_properties_last, prefer_const_literals_to_create_immutables, avoid_unnecessary_containers
+import 'package:flexpay/components/bottom_navigation.dart';
+import 'package:flexpay/components/deposit_form.dart';
 import 'package:flutter/material.dart';
 import 'package:glassmorphism/glassmorphism.dart';
-import 'package:localstorage/localstorage.dart';
+import 'package:http/http.dart' as http;
+
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:getwidget/getwidget.dart';
-import 'package:http/http.dart' as http;
+// import 'package:provider/provider.dart';
+
 
 class Dashboard extends StatefulWidget {
   const Dashboard({Key? key}) : super(key: key);
 
   @override
   State<Dashboard> createState() => _DashboardState();
+}
+
+class Transaction {
+  final String id;
+  final String transactionType;
+  final String description;
+  final String amount;
+  final String createdAt;
+
+  const Transaction(
+      {required this.id,
+      required this.transactionType,
+      required this.amount,
+      required this.description,
+      required this.createdAt});
 }
 
 List<DropdownMenuItem<String>> get dropdownItems {
@@ -26,25 +45,62 @@ List<DropdownMenuItem<String>> get dropdownItems {
 }
 
 String currency = "USD";
-bool loading = false;
+bool loading = true;
 double balance = 450;
 String oldValue = "";
 String selectedValue = "USD";
 String name = "";
 String token = "";
+int amount = 700;
+String description = "NYSC allawee";
+var balanceData = {};
 
 class _DashboardState extends State<Dashboard> {
+  List<dynamic> transactions = [];
 
-  void setUser() async {
-    final sharedPreference = await SharedPreferences.getInstance();
-    Map<String, dynamic> jsonUser =
-        jsonDecode(sharedPreference.getString('user') ?? "");
+   late SharedPreferences sharedPreferences;  
+
+   
+
+  
+
+  void _fetchBalance() async {
+    String apiUrl = "https://flex-pay.herokuapp.com/wallet/details";
+    final response = await http.get(
+      Uri.parse(apiUrl),
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $token',
+      },
+    );
+   
+    balanceData = json.decode(response.body);
+    sharedPreferences.setString('balance',balanceData["balance"].toString());
     setState(() {
-      name = jsonUser['name'];
-      token = jsonUser['token'];
+      balance = balanceData["balance"];
+      loading = false;
+      
     });
   }
 
+  void _fetchTransactions() async {
+    try {
+      String apiUrl = "https://flex-pay.herokuapp.com/wallet/transactions";
+      final response = await http.get(
+        Uri.parse(apiUrl),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $token',
+        },
+      );
+      // print(response.body);
+      var responseData = response.body;
+      transactions.addAll((json.decode(responseData)["results"]));
+      
+    } catch (error) {
+      return;
+    }
+  }
 
   void changeCurrency(newValue) async {
     setState(() {
@@ -52,35 +108,59 @@ class _DashboardState extends State<Dashboard> {
       oldValue = currency;
       currency = newValue;
     });
-    print('here is the money');
-    // print(balance.runtimeType);
-   final Map balanceData = {
-       "currency":oldValue,
-       "newCurrency":newValue,
-      };
-    print(balanceData["newCurrency"]);
-    print(balanceData['currency']);
+
+    final Map balanceData = {
+      "currency": oldValue,
+      "newCurrency": newValue,
+    };
     const String apiUrl = "https://tellbooksapi.herokuapp.com/converter";
-      final response = await http.post(Uri.parse(apiUrl), 
-      headers: {
-      'Content-Type': 'application/json; charset=UTF-8',
-      'Authorization': 'Bearer $token',
-    },
-      body: json.encode(balanceData));
-    
-       setState(() {
-      balance = double.parse((double.parse(response.body)*balance).toStringAsFixed(2));
+    final response = await http.post(Uri.parse(apiUrl),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $token',
+        },
+        body: json.encode(balanceData));
+
+    setState(() {
+      balance = double.parse(
+          (double.parse(response.body) * balance).toStringAsFixed(2));
     });
-      loading = false;
-      // print(data.toString());
-      
+    loading = false;
   }
 
-  final LocalStorage storage = LocalStorage('user');
+  _setUser() async {
+    try {
+      final sharedPreference = await SharedPreferences.getInstance();
+      Map<String, dynamic> jsonUser =
+          jsonDecode(sharedPreference.getString('user') ?? "");
+      setState(() {
+        name = jsonUser['name'];
+        token = jsonUser['token'];
+      });
+      // print("this runs more than once!");
+      
+      _fetchBalance();
+      _fetchTransactions();
+    } catch (error) {
+      return error;
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    initialGetSavedData();
+    _setUser();
+  }
+
+ void initialGetSavedData() async{
+    sharedPreferences = await SharedPreferences.getInstance();
+   }
+
 
   @override
   Widget build(BuildContext context) {
-    setUser();
+    //  setUser();
     return Scaffold(
       backgroundColor: Colors.orange[800],
       body: SingleChildScrollView(
@@ -154,17 +234,19 @@ class _DashboardState extends State<Dashboard> {
                               children: <Widget>[
                                 Text('Total Balance',
                                     style: TextStyle(color: Colors.white)),
-                               SizedBox(height:10),
-                               if(loading==true)
-                              GFLoader(size: 60,loaderColorOne: Colors.white,loaderColorTwo:Colors.white,loaderColorThree: Colors.white),
-                               
-                                if(loading==false)
-                                Text("$currency $balance",
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 40,
-                                        fontWeight: FontWeight.w600)),
-                               
+                                SizedBox(height: 10),
+                                if (loading == true)
+                                  GFLoader(
+                                      size: 60,
+                                      loaderColorOne: Colors.white,
+                                      loaderColorTwo: Colors.white,
+                                      loaderColorThree: Colors.white),
+                                if (loading == false)
+                                  Text("$currency $balance",
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 40,
+                                          fontWeight: FontWeight.w600)),
                                 SizedBox(height: 10),
                                 SizedBox(
                                   width: 90,
@@ -213,8 +295,8 @@ class _DashboardState extends State<Dashboard> {
                                                 color: Colors.white),
                                           ),
                                           onPressed: () {
-                                            Navigator.pushReplacementNamed(
-                                                context, '/login');
+                                            Navigator.pushNamed(
+                                                context, '/transfer');
                                           },
                                         ),
                                         SizedBox(height: 10),
@@ -238,12 +320,24 @@ class _DashboardState extends State<Dashboard> {
                                             padding: EdgeInsets.all(10),
                                             child: Icon(
                                                 Icons
-                                                    .keyboard_double_arrow_down_outlined,
+                                                    .keyboard_double_arrow_up_outlined,
                                                 color: Colors.white),
                                           ),
                                           onPressed: () {
-                                            Navigator.pushReplacementNamed(
-                                                context, '/login');
+                                            showModalBottomSheet(
+                                              context: context,
+                                              builder: (context) {
+                                                return DepositForm();
+                                              },
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.vertical(
+                                                  top: Radius.circular(20),
+                                                ),
+                                              ),
+                                              clipBehavior:
+                                                  Clip.antiAliasWithSaveLayer,
+                                            );
                                           },
                                         ),
                                         SizedBox(height: 10),
@@ -271,11 +365,11 @@ class _DashboardState extends State<Dashboard> {
                                           ),
                                           onPressed: () {
                                             Navigator.pushReplacementNamed(
-                                                context, '/login');
+                                                context, '/wallet');
                                           },
                                         ),
                                         SizedBox(height: 10),
-                                        Text('Bills',
+                                        Text('Wallet',
                                             style: TextStyle(
                                                 color: Colors.white,
                                                 fontSize: 16))
@@ -334,97 +428,83 @@ class _DashboardState extends State<Dashboard> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
+                    Text(
+                      "Recent Transactions",
+                      textAlign: TextAlign.start,
+                      style: TextStyle(fontSize: 17),
+                    ),
+                    ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: transactions.length,
+                        physics: NeverScrollableScrollPhysics(),
+                        itemBuilder: (context, index) {
+                          final transaction = transactions[index];
+                          return SingleChildScrollView(
+                            child: Padding(
+                              padding: EdgeInsets.fromLTRB(20, 0, 20, 10),
+                              child: Card(
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(18.0),
+                                    side: BorderSide(color: Colors.orange)),
+                                child: ListTile(
+                                  contentPadding:
+                                      const EdgeInsets.fromLTRB(20, 20, 20, 20),
+                                  leading: CircleAvatar(
+                                    radius: 28,
+                                    backgroundImage: AssetImage(
+                                        transaction["transaction_type"] ==
+                                                "deposit"
+                                            ? 'images/deposit.png'
+                                            : 'images/withdrawal.png'),
+                                  ),
+                                  title: Text(transaction["description"],
+                                      style: TextStyle(fontSize: 15)),
+                                  subtitle: Text(
+                                    "${(transaction["created_at"].toString())
+                                            .substring(0, 10)}, ${(transaction["created_at"].toString())
+                                            .substring(11, 16)}",
+                                    style: TextStyle(fontSize: 10),
+                                  ),
+                                  trailing:
+                                      Text('USD ${transaction["amount"]}'),
+                                ),
+                              ),
+                            ),
+                          );
+                        }),
+                        SizedBox(height:20),
                     Text("Your Saving circle",
                         style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.w500)),
-                    SvgPicture.asset("images/nosavings.svg"),
+                            fontSize: 17, fontWeight: FontWeight.w500)),
+                    SizedBox(height:20),
+                    SvgPicture.asset("images/nosavings.svg",height: 250,width:250),
+                    SizedBox(height:10),
                     Padding(
                         padding: const EdgeInsets.fromLTRB(30, 0, 30, 0),
                         child: Text(
                           "You don't currently belong to a saving circle. Tap the button below to create/join one",
                           textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 17),
+                          style: TextStyle(fontSize: 14),
                         )),
                     SizedBox(height: 30),
                     ElevatedButton(
                         style: ElevatedButton.styleFrom(
                             primary: Colors.orange[800]),
                         onPressed: () {
-                          Navigator.pushNamed(context, '/coming-soon');
+                          Navigator.pushNamed(context, "/saving-circle");
                         },
                         child: Padding(
                             padding: const EdgeInsets.fromLTRB(13, 15, 13, 15),
-                            child: Text("Join saving circle")))
+                            child: Text(
+                              "Join saving circle",
+                              style: TextStyle(fontSize: 17),
+                            )))
                   ],
                 ),
               )),
         ]),
       ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(color: Colors.white),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(0, 12, 0, 12),
-          child: Card(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(50),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Expanded(
-                    child: IconButton(
-                      icon: Icon(Icons.home, color: Colors.grey[300]),
-                      onPressed: () {},
-                    ),
-                  ),
-                  Expanded(
-                    child: IconButton(
-                      icon: Icon(Icons.pie_chart, color: Colors.grey[300]),
-                      onPressed: () {
-                        Navigator.pushNamed(context, '/invest');
-                      },
-                    ),
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
-                      child: SizedBox(
-                        height: 50,
-                        width: 50,
-                        child: TextButton(
-                          style: TextButton.styleFrom(
-                            backgroundColor: Colors.orange[800],
-                            shape: CircleBorder(),
-                          ),
-                          child: Icon(Icons.add, color: Colors.white),
-                          onPressed: () {
-                            Navigator.pushReplacementNamed(context, '/login');
-                          },
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: IconButton(
-                      icon: Icon(Icons.account_balance_wallet,
-                          color: Colors.grey[300]),
-                      onPressed: () {},
-                    ),
-                  ),
-                  Expanded(
-                    child: IconButton(
-                      icon: Icon(Icons.notifications, color: Colors.grey[300]),
-                      onPressed: () {},
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
+      bottomNavigationBar: BottomNavigation(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }

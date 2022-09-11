@@ -7,10 +7,6 @@ class More extends StatefulWidget {
   State<More> createState() => _MoreState();
 }
 
-List<Map> moreItems = [
-  {"name": "Send Money", "icon": "Icons.arrow_right", "link": "/send-money"},
-  {"name": "Topup Wallet", "icon": "Icons.arrow_right", "link": "/top-up"},
-];
 
 class _MoreState extends State<More> {
   @override
@@ -130,7 +126,9 @@ class _MoreState extends State<More> {
               ),
 
                TextButton(
-                onPressed: (){},
+                onPressed: (){
+                Navigator.of(context).pushNamed('/saving-circle'); 
+                },
                 child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                   Row(children: [
                     Card(

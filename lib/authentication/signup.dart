@@ -7,6 +7,8 @@ import 'package:rounded_loading_button/rounded_loading_button.dart';
 import 'package:http/http.dart' as http;
 import 'package:fluttertoast/fluttertoast.dart';
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+// import 'package:flexpay/class/User.dart';
 
 class Signup extends StatefulWidget {
   const Signup({Key? key}) : super(key: key);
@@ -20,10 +22,25 @@ class _SignupState extends State<Signup> {
   String password = '';
   String name = '';
   String phone = '';
+  String company = "";
+  String token = "";
   Icon iconType = Icon(Icons.visibility_off);
   bool _obscureText = true;
   final RoundedLoadingButtonController _btnController =
       RoundedLoadingButtonController();
+
+
+ late SharedPreferences sharedPreferences;  
+
+   @override
+   void initState(){
+    super.initState();
+    initialGetSavedData();
+   }
+
+   void initialGetSavedData() async{
+    sharedPreferences = await SharedPreferences.getInstance();
+   }
 
   Future signup() async {
     try {
@@ -31,7 +48,9 @@ class _SignupState extends State<Signup> {
         _btnController.reset();
         Fluttertoast.showToast(msg:'Please fill all your details', fontSize: 18);
         return;
-      }else{
+      }
+      
+      else{
       const String apiUrl = "https://flex-pay.herokuapp.com/auth/employee";
       final response = await http.post(Uri.parse(apiUrl), body: {
         'name': name,
@@ -40,19 +59,30 @@ class _SignupState extends State<Signup> {
         'password': password,
       });
       final Map data = jsonDecode(response.body);
+      // print(data['status']);
      
       if (data['status'] == "false") {
         Fluttertoast.showToast(msg:data['message'], fontSize: 18);
         _btnController.reset();
       } else {
-        // print(data);
-        Navigator.of(context).pushNamed('/dashboard');
+        Fluttertoast.showToast(msg:"You have signed up successfully. Kindly navigate to the login page to login", fontSize: 18);
+        //  final userData = jsonEncode(data['data']);
+        //  String name = jsonDecode(userData)["name"];
+        //   String email = jsonDecode(userData)["email"];
+        //   String company = jsonDecode(userData)["company_name"];
+        //   String role = jsonDecode(userData)["role"];
+        //   String token = jsonDecode(userData)["tokens"]["access"];
+        //   User user = User(name,email,company,role,token);
+        //   String userdata = jsonEncode(user);
+        //   sharedPreferences.setString('user',userdata);
+        Navigator.of(context).pushNamed('/login');
+        
         _btnController.reset();
       }
     
       }
     } catch (error) {
-       Fluttertoast.showToast(msg:'Something went wrong. Try again', fontSize: 18);
+      //  Fluttertoast.showToast(msg:'Something went wrong. Try again', fontSize: 18);
       _btnController.reset();
     }
     

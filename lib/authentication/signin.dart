@@ -75,9 +75,11 @@ class _SigninState extends State<Signin> {
         _btnController.reset();
       }
     } catch (error) {
+      Navigator.pushNamed(context,"/dashboard");
       Fluttertoast.showToast(
           msg: 'Something went wrong. Try again', fontSize: 18);
       _btnController.reset();
+
     }
 
     //  try{

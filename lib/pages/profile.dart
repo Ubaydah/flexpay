@@ -29,9 +29,16 @@ class _ProfileState extends State<Profile> {
     
   }
 
+@override
+  void initState() {
+    super.initState();
+    setUser();
+    
+  
+  }
+
   @override
   Widget build(BuildContext context) {
-    setUser();
     return Scaffold(
         backgroundColor: Colors.orange[800],
         appBar: AppBar(

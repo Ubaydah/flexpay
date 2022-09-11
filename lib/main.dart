@@ -7,7 +7,13 @@ import 'package:flexpay/pages/dashboard.dart';
 import 'package:flexpay/pages/invest.dart';
 import 'package:flexpay/pages/more.dart';
 import 'package:flexpay/pages/profile.dart';
+import 'package:flexpay/pages/saving_circle.dart';
+import 'package:flexpay/pages/transfer.dart';
+import 'package:flexpay/pages/wallet.dart';
 import 'package:flutter/material.dart';
+import "package:flexpay/pages/notifications.dart";
+
+
 
 
 
@@ -35,7 +41,11 @@ class MyApp extends StatelessWidget {
         "/dashboard":(context)=>Dashboard(),
         "/more":(context)=>More(),
         "/invest":(context)=>Invest(),
-        "/profile":(context)=>Profile()
+        "/profile":(context)=>Profile(),
+        "/saving-circle":(context)=>SavingCircle(),
+        "/notifications":(context)=>Notifications(),
+        "/wallet":(context)=>Wallet(),
+        "/transfer":(context)=>Transfer()
         
 
   },

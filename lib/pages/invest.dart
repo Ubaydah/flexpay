@@ -1,7 +1,12 @@
 // ignore_for_file: avoid_unnecessary_containers
 
+import 'package:flexpay/components/savingcircles.dart';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:flexpay/components/bottom_navigation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+// import 'dart:convert';
+
 
 class Invest extends StatefulWidget {
   const Invest({Key? key}) : super(key: key);
@@ -10,7 +15,45 @@ class Invest extends StatefulWidget {
   State<Invest> createState() => _InvestState();
 }
 
+
+
+
 class _InvestState extends State<Invest> {
+  late SharedPreferences sharedPreferences; 
+String balance = "";
+String interest = "";
+  
+
+   void initialGetSavedData() async{
+    sharedPreferences = await SharedPreferences.getInstance();
+   }
+
+   _setBalance() async {
+    try {
+    
+      final sharedPreference = await SharedPreferences.getInstance();
+      String jsonBalance = (sharedPreference.getString('balance')).toString();
+        
+      setState(() {
+        balance = jsonBalance;
+        interest = (double.parse(jsonBalance)*0.0102).toStringAsFixed(2);
+      });
+      
+    } catch (error) {
+      return error;
+    }
+  }
+
+
+ 
+@override
+   void initState(){
+    super.initState();
+    initialGetSavedData();
+    _setBalance();
+   }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,12 +98,12 @@ class _InvestState extends State<Invest> {
                     children: [
                       Column(children: <Widget>[
                         const Text("Earned",style: TextStyle(color: Colors.black26),),
-                        Text("\$ 3004",style: TextStyle(fontSize: 20,color: Colors.orange[800]),),
+                        Text("\$ $balance",style: TextStyle(fontSize: 20,color: Colors.orange[800]),),
                       ],),
                       const VerticalDivider(color: Colors.black,),
                       Column(children: <Widget>[
                         const Text("Interest",style: TextStyle(color: Colors.black26),),
-                        Text("\$ 104",style: TextStyle(fontSize: 20,color: Colors.orange[800]),),
+                        Text("\$ $interest",style: TextStyle(fontSize: 20,color: Colors.orange[800]),),
                       ],)
                     ],
                     
@@ -77,84 +120,21 @@ class _InvestState extends State<Invest> {
                 ),
                   ),
                       child:Padding(
-                        padding: const EdgeInsets.fromLTRB(28, 24, 0, 90),
+                        padding: const EdgeInsets.fromLTRB(0, 24, 0, 90),
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children:const [
-                          Text("Your Saving circle")
+                          Text("Join Saving Circle"),
+                          Padding(
+                            padding: EdgeInsets.fromLTRB(10, 6, 10, 6),
+                            child: SavingCircles())
                         ],),
                       )
                     ),
           ],
         ),
       ),
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(color: Colors.white),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(0, 12, 0, 12),
-          child: Card(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(50),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Expanded(
-                    child: IconButton(
-                      icon: Icon(Icons.home, color: Colors.grey[300]),
-                      onPressed: () {
-                        Navigator.pushNamed(context, '/dashboard');
-                      },
-                    ),
-                  ),
-                  Expanded(
-                    child: IconButton(
-                      icon: Icon(Icons.pie_chart, color: Colors.grey[300]),
-                      onPressed: () {
-                        Navigator.pushNamed(context, '/invest');
-                      },
-                    ),
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
-                      child: SizedBox(
-                        height: 50,
-                        width: 50,
-                        child: TextButton(
-                          style: TextButton.styleFrom(
-                            backgroundColor: Colors.orange[800],
-                            shape: const CircleBorder(),
-                          ),
-                          child: const Icon(Icons.add, color: Colors.white),
-                          onPressed: () {
-                            Navigator.pushReplacementNamed(context, '/login');
-                          },
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: IconButton(
-                      icon: Icon(Icons.account_balance_wallet,
-                          color: Colors.grey[300]),
-                      onPressed: () {},
-                    ),
-                  ),
-                  Expanded(
-                    child: IconButton(
-                      icon: Icon(Icons.notifications, color: Colors.grey[300]),
-                      onPressed: () {},
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
+      bottomNavigationBar:const BottomNavigation(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
