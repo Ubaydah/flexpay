@@ -1,7 +1,9 @@
 # Flexpay - Payroll management and Mobile Banking app using APY interest
 
+Background: Flexpay is a platform that leverages on APIs from Oval Finance to enable employers and employees earn more money through APY interest.
+
 ### We developed two different platforms for our target users: 
-##### 1) A web application for the employers 
+##### 1) A payroll management web application for the employers 
 ##### 2) A mobile banking application for the employees 
 
 ## For Employer use case
