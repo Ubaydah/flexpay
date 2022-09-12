@@ -1,7 +1,21 @@
 import React from "react";
-import Ellipse1 from "../assets/circleChart.svg";
+import { PieChart, Pie, Label } from "recharts";
+import { useGetWalletQuery } from "../redux/services";
 
 const Overview = ({ trans }) => {
+  const { data } = useGetWalletQuery();
+
+  const graphData = [
+    {
+      value: data?.balance,
+      fill: "#D9D9D9",
+    },
+    {
+      value: 0.1 * data?.balance,
+      fill: "#F26722",
+    },
+  ];
+
   return (
     <div className={`border-4 border-[#EDEDFE] rounded-lg py-5 px-5 mb-5 ${trans && "sm:w-[350px]"}`}>
       <div className="flex justify-between items-center mb-7">
@@ -10,8 +24,12 @@ const Overview = ({ trans }) => {
           <option>APY Interest</option>
         </select>
       </div>
-      <div className="flex justify-center">
-        <img src={Ellipse1} alt="" className="w-[70%] md:w-full" />
+      <div>
+        <PieChart width={250} height={250}>
+          <Pie data={graphData} dataKey="value" innerRadius={60} outerRadius={90} fill="#F26722">
+            <Label value="10%" position="center" />
+          </Pie>
+        </PieChart>
       </div>
     </div>
   );

@@ -1,9 +1,9 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
-import { baseQuery, createRequest } from "./shared";
+import { baseQueryWithReauth, createRequest, createRequestWithParams } from "./shared";
 
 export const walletApi = createApi({
   reducerPath: "walletApi",
-  baseQuery: baseQuery,
+  baseQuery: baseQueryWithReauth,
   tagTypes: ["wallet"],
   endpoints: (builder) => ({
     exchangeCurrency: builder.mutation({
@@ -25,11 +25,42 @@ export const walletApi = createApi({
       },
       invalidatesTags: ["wallet"],
     }),
+    withdrawFunds: builder.mutation({
+      query: (data) => {
+        return {
+          url: `/wallet/withdrawal`,
+          method: "post",
+          body: data,
+        };
+      },
+      invalidatesTags: ["wallet"],
+    }),
+    transferFunds: builder.mutation({
+      query: (data) => {
+        return {
+          url: `/wallet/employee/transfer`,
+          method: "post",
+          body: data,
+        };
+      },
+      invalidatesTags: ["wallet"],
+    }),
     getWallet: builder.query({
       query: () => createRequest(`wallet/details`),
+      providesTags: (_result, _error, id) => [{ type: "wallet", id }],
+    }),
+    getTransactions: builder.query({
+      query: (args) => createRequestWithParams(`wallet/transactions`, { page: args?.page }),
       providesTags: (_result, _error, id) => [{ type: "wallet", id }],
     }),
   }),
 });
 
-export const { useExchangeCurrencyMutation, useFundWalletMutation, useGetWalletQuery } = walletApi;
+export const {
+  useTransferFundsMutation,
+  useExchangeCurrencyMutation,
+  useFundWalletMutation,
+  useGetWalletQuery,
+  useWithdrawFundsMutation,
+  useGetTransactionsQuery,
+} = walletApi;

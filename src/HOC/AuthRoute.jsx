@@ -8,7 +8,7 @@ const AuthRoute = ({ children }) => {
   const { authorization } = useSelector((state) => state.authStore);
 
   if (isEmpty(authorization?.access)) {
-    return <Navigate to="/" state={{ from: location }} />;
+    return <Navigate to="/login" state={{ from: location }} />;
   }
   return children;
 };

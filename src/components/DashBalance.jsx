@@ -1,11 +1,10 @@
-import { ErrorMessage, Field, Formik } from "formik";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import Popup from "reactjs-popup";
 import { closeModal, openModal } from "../redux/modal/modalRedux";
-import { useExchangeCurrencyMutation, useFundWalletMutation, useGetWalletQuery } from "../redux/services";
-import { fundWalletFields, FundWalletSchema } from "../schemas/wallet";
+import { useExchangeCurrencyMutation, useFundWalletMutation, useGetWalletQuery, useWithdrawFundsMutation } from "../redux/services";
+import WalletForm from "./WalletForm";
 import XCancel from "./XCancel";
 
 export const currency = [
@@ -17,6 +16,7 @@ export const currency = [
 const DashBalance = () => {
   const [exchangeCurrency, { data, isLoading: loader, isSuccess, isError, error }] = useExchangeCurrencyMutation();
   const [fundWallet, { isLoading, isSuccess: success, isError: iserror, error: err }] = useFundWalletMutation();
+  const [withdrawFund, { isLoading: loading, isSuccess: IsSuccess, isError: Iserror, error: Err }] = useWithdrawFundsMutation();
   const { data: wallet, isFetching, isSuccess: issuccess, isError: iserr, error: errorr } = useGetWalletQuery();
   const [balance, setBalance] = useState({ sign: "$", value: wallet?.balance });
   const [sign, setSign] = useState();
@@ -61,6 +61,20 @@ const DashBalance = () => {
     }
   }, [isLoading, err, iserror, success, dispatch]);
 
+  useEffect(() => {
+    if (loading) {
+      dispatch(openModal());
+    }
+    if (IsSuccess) {
+      toast.success(`Withdrawal successful`);
+      dispatch(closeModal());
+    }
+    if (Iserror && Err) {
+      toast.error(Err?.data?.message);
+      dispatch(closeModal());
+    }
+  }, [loading, Err, Iserror, IsSuccess, dispatch]);
+
   const handleExchangeFunds = (e) => {
     setValue(e.target.value);
     if (e.target.value.split(",")[0] === "$") {
@@ -73,6 +87,12 @@ const DashBalance = () => {
 
   const handleFundWallet = (values, close) => {
     fundWallet({ ...values, amount: Number(values.amount) });
+    setValue("$, USD");
+    close();
+  };
+
+  const handleWithdrawFund = (values, close) => {
+    withdrawFund({ ...values, amount: Number(values.amount) });
     setValue("$, USD");
     close();
   };
@@ -96,9 +116,35 @@ const DashBalance = () => {
         </p>
       </div>
       <div className="flex justify-center items-center pb-10 px-4 md:px-0">
-        <button className="py-3 w-40 rounded-lg bg-white hover:bg-orange hover:border-2 hover:text-white hover:border-white font-bold">
-          Withdraw
-        </button>
+        <Popup
+          trigger={
+            <button className="py-3 w-40 rounded-lg bg-white hover:bg-orange hover:border-2 hover:text-white hover:border-white font-bold">
+              Withdraw
+            </button>
+          }
+          position="right center"
+          modal
+          closeOnDocumentClick
+          nested
+          contentStyle={{
+            borderRadius: "12px",
+            width: "fit-content",
+            backgroundColor: "white",
+            fontSize: "0.8rem",
+          }}
+        >
+          {(close) => (
+            <>
+              <div className="mt-4 mr-4">
+                <XCancel close={close} />
+              </div>
+              <div className="px-[24px] pb-[32px] w-[300px] md:w-[500px] h-[auto]">
+                <WalletForm handleFundWallet={handleWithdrawFund} close={close} isWithdraw={true} />
+              </div>
+            </>
+          )}
+        </Popup>
+
         <Popup
           trigger={
             <button className="py-3  w-40 border-2 rounded-lg text-white border-white ml-5 hover:bg-white hover:text-black font-bold">Fund</button>
@@ -120,51 +166,7 @@ const DashBalance = () => {
                 <XCancel close={close} />
               </div>
               <div className="px-[24px] pb-[32px] w-[300px] md:w-[500px] h-[auto]">
-                <Formik onSubmit={(values) => handleFundWallet(values, close)} validationSchema={FundWalletSchema} initialValues={fundWalletFields}>
-                  {({ handleSubmit }) => (
-                    <>
-                      <p className="text-[#131221] font-black text-[16px] md:text-[24px] grid justify-center">Fund Wallet</p>
-                      <div className="pt-5">
-                        <label>Amount</label>
-                        <div className="mt-1 relative flex justify-end">
-                          <Field
-                            name={"amount"}
-                            placeholder={"Enter an amount"}
-                            className="border w-full md:w-[500px] h-[40px] border-[#030729] opacity-50 rounded px-2  focus:outline-none "
-                          />
-                        </div>
-                        <ErrorMessage
-                          name={"amount"}
-                          render={(msg) => <div className={"text-[0.7812rem] text-red-600 text-left font-normal "}>{msg}</div>}
-                        />
-                      </div>
-                      <div className="pt-5">
-                        <label>Description</label>
-                        <div className="mt-1 relative flex justify-end">
-                          <Field
-                            name={"description"}
-                            placeholder={"Enter description"}
-                            onKeyDown={(e) => {
-                              e.key === "Enter" && handleSubmit();
-                            }}
-                            className="border w-full md:w-[500px] h-[40px] border-[#030729] opacity-50 rounded px-2  focus:outline-none "
-                          />
-                        </div>
-                        <ErrorMessage
-                          name={"description"}
-                          render={(msg) => <div className={"text-[0.7812rem] text-red-600 text-left font-normal "}>{msg}</div>}
-                        />
-                      </div>
-
-                      <button
-                        onClick={handleSubmit}
-                        className="text-white bg-orange mt-8 hover:text-orange hover:bg-white text-base font-bold border-2 border-orange rounded-full p-2 hover:bg-orange hover:text-white w-full"
-                      >
-                        Submit <i className="fa fa-solid fa-arrow-right ml-2"></i>
-                      </button>
-                    </>
-                  )}
-                </Formik>
+                <WalletForm handleFundWallet={handleFundWallet} close={close} />
               </div>
             </>
           )}

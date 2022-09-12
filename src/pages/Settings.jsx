@@ -170,16 +170,16 @@ const Settings = () => {
                   <div className="flex justify-between w-full">
                     <div className="bg-[#F8F8F9] p-3 rounded-lg w-full">
                       <div className="w-full flex gap-2">
-                        <input type="text" placeholder="Zenith Bank" className="bg-[#F8F8F9] min-w-[100px] focus:outline-none mt-2" />
-                        <input type="text" placeholder="042264771" className="bg-[#F8F8F9] min-w-[100px] focus:outline-none mt-2" />
+                        <input type="text" placeholder="Zenith Bank" className="bg-[#F8F8F9] min-w-[100px] focus:outline-none" />
+                        <input type="text" placeholder="042264771" className="bg-[#F8F8F9] min-w-[100px] focus:outline-none" />
                       </div>
                     </div>
                   </div>
                   <div className="flex justify-between w-full mt-2">
                     <div className="bg-[#F8F8F9] p-3 rounded-lg w-full">
                       <div className="w-full flex gap-2">
-                        <input type="text" placeholder="Zenith Bank" className="bg-[#F8F8F9] min-w-[100px] focus:outline-none mt-2" />
-                        <input type="text" placeholder="042264771" className="bg-[#F8F8F9] min-w-[100px] focus:outline-none mt-2" />
+                        <input type="text" placeholder="Zenith Bank" className="bg-[#F8F8F9] min-w-[100px] focus:outline-none" />
+                        <input type="text" placeholder="042264771" className="bg-[#F8F8F9] min-w-[100px] focus:outline-none" />
                       </div>
                     </div>
                   </div>

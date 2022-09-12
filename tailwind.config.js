@@ -1,6 +1,10 @@
 module.exports = {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
+    fontFamily: {
+      Inter: ["Inter"],
+      DM_sans: ["DM Sans"],
+    },
     extend: {
       colors: {
         orange: "#F26722",
@@ -34,10 +38,16 @@ module.exports = {
             transform: "translateX(-120%)",
           },
         },
+        "fade-out": {
+          "0%": { opacity: 1 },
+          "99%": { opacity: 0.01 },
+          "100% ": { opacity: 0 },
+        },
       },
       animation: {
         "slide-in": "slide-in 0.5s forwards",
         "slide-out": "slide-out 0.5s forwards",
+        "fade-out": "fade-out 2s forwards ",
       },
     },
   },

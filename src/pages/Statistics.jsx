@@ -18,7 +18,7 @@ const Statistics = () => {
           <div className="order-2 sm:w-[350px]">
             <div className="mb-5">
               <p className="text-xl">Total</p>
-              <p className="text-[30px] sm:text-[30px] sm:text-[40px]  font-extrabold">$5,000,000.00</p>
+              <p className="text-[30px] sm:text-[40px]  font-extrabold">$5,000,000.00</p>
             </div>
             <div className="mb-5">
               <p className="text-xl">Earned Interest</p>

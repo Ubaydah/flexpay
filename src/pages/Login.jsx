@@ -116,7 +116,7 @@ const Login = () => {
               </button>
               <p className="text-base font-semibold mt-3">
                 Don't have an account?
-                <Link to="register">
+                <Link to="/register">
                   {" "}
                   <span className="text-orange cursor-pointer pl-2">Sign up</span>
                 </Link>

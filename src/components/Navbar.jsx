@@ -1,28 +1,27 @@
 import React, { useEffect, useState } from "react";
 import { MdDashboard, MdNotifications, MdSettings } from "react-icons/md";
 import { BsArrowRightShort, BsFillBarChartLineFill, BsPeopleFill } from "react-icons/bs";
-import Image03 from "../assets/profile.png";
 import { HiMenuAlt4 } from "react-icons/hi";
 import { AiOutlineClose } from "react-icons/ai";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FaWallet } from "react-icons/fa";
 import { motion, useAnimation } from "framer-motion";
 import { BiTransfer } from "react-icons/bi";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 const Navbar = ({ navbar }) => {
   const [toggleMenu, setToggleMenu] = useState("");
+  const { user } = useSelector((state) => state.authStore);
   const location = useLocation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
   const animation = useAnimation();
 
   useEffect(() => {
     if (toggleMenu === "open") {
       setTimeout(() => {
         animation.start("visible");
-      }, 100);
+      }, 10);
     } else {
       animation.start("hidden");
     }
@@ -31,12 +30,12 @@ const Navbar = ({ navbar }) => {
   const variants = {
     hidden: {
       transition: {
-        staggerChildren: 0.05,
+        staggerChildren: 0.005,
       },
     },
     visible: {
       transition: {
-        staggerChildren: 0.05,
+        staggerChildren: 0.005,
       },
     },
   };
@@ -124,8 +123,10 @@ const Navbar = ({ navbar }) => {
         <p className="text-2xl hidden md:block font-extrabold">{navbar}</p>
       )}
       <div className="flex items-center gap-4">
-        <MdNotifications className="text-3xl mr-7 " />
-        <img src={Image03} alt="" />
+        <MdNotifications className="text-3xl mr-2 " />
+        <p className="w-10 h-10 bg-orange text-white rounded-full text-center flex justify-center items-center">
+          {user?.company_name.charAt(0).toUpperCase()}
+        </p>
       </div>
     </div>
   );

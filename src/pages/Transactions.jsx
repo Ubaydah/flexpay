@@ -38,7 +38,7 @@ const Transactions = () => {
             Scheduled
           </p>
         </div>
-        <Transcation />
+        <Transcation istransaction={true} />
       </div>
       <div className="md:mt-5 mx-3 md:mx-0 md:mr-5">
         <Overview />

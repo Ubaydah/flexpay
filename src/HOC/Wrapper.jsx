@@ -2,7 +2,7 @@ import Sidebar from "../components/Sidebar";
 
 import AuthRoute from "./AuthRoute";
 
-const Wrapper = ({ logout, children }) => {
+const Wrapper = ({ children }) => {
   return (
     <AuthRoute>
       <div className="flex md:flex-row flex-col gap-3">

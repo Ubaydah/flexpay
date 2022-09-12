@@ -163,7 +163,7 @@ const SignUp = () => {
               </button>
               <p className="text-base font-semibold mt-3">
                 Already have an account?{" "}
-                <Link to="/">
+                <Link to="/login">
                   <span className="text-orange cursor-pointer pl-2">Login</span>
                 </Link>
               </p>
