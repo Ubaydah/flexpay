@@ -186,7 +186,7 @@ class TransferSerializer(serializers.Serializer):
                 wallet=wallet,
                 transaction_type="transfer",
                 description=description,
-                amount=amount,
+                amount=-amount,
                 source=wallet,
             )
 
@@ -215,7 +215,7 @@ class TransferSerializer(serializers.Serializer):
                 wallet=wallet,
                 transaction_type="transfer",
                 description=description,
-                amount=amount,
+                amount=-amount,
                 status="success",
                 source=wallet,
             )
