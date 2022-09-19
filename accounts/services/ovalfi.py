@@ -55,6 +55,25 @@ class OvalFi:
             return amount
         else:
             raise ValueError("An error occured")
+    
+    @staticmethod
+    def get_customer_balance(customer_id):
+        header = {
+            "Authorization": f"Bearer {settings.OVALFI_TOKEN}",
+            "Content-Type": "application/json",
+        }
+        customer_id = "df2f0d49-bba3-46df-a501-735e4b74a257"
+        response = requests.get(
+            f"{settings.OVALFI_BASE_URL}/customer/balance/{customer_id}",
+            headers=header,
+        )
+        print(response.text)
+        if response.ok:
+            response_dict = json.loads(response.text)
+            balance = response_dict["data"]["balance"]
+            return balance
+        else:
+            raise ValueError("An error occured")
 
     @staticmethod
     def initiate_deposit(customer_id, amount):

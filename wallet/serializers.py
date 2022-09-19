@@ -67,8 +67,14 @@ class WalletDetailsSerializer(serializers.ModelSerializer):
     balance = serializers.SerializerMethodField()
 
     def get_balance(self, obj):
-        bal = Helper.get_balance(obj)
-        return bal
+        if obj.user.is_employer == True:
+            profile = CompanyProfile.objects.get(user=obj.user)
+            bal = OvalFi.get_customer_balance(profile.oval_customer_id)
+            return bal
+        elif obj.user.is_employee == True:
+            profile = EmployeeeProfile.objects.get(user=obj.user)
+            bal = OvalFi.get_customer_balance(profile.oval_customer_id)
+            return bal
 
     class Meta:
         model = Wallet
