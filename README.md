@@ -14,7 +14,7 @@ Web application url: [https:flex-pay.netlify.app](https://flex-pay.netlify.app)
 Mobile application download link (android only for now 🥺): [https://appsenjoy.com/mS6aM](https://appsenjoy.com/mS6aM)
 
 
-## Test login credentials for Employee mobile app
+## Test login credentials for Employee mobile app.
 
 ```
 email: tobilobaojuolape@gmail.com
